@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import * as chrono from 'chrono-node';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Gantt from 'frappe-gantt';
+import AIAssistantPanel from './components/AIAssistantPanel';
 import { useEffect, useRef } from 'react';
 
 const initialTasks = [
@@ -19,8 +21,12 @@ const columns = [
 ];
 
 function App() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState(() => {
+    const saved = localStorage.getItem('projectData');
+    return saved ? JSON.parse(saved) : initialTasks;
+  });
   const [showGantt, setShowGantt] = useState(false);
+  const [showAIPanel, setShowAIPanel] = useState(true);
   const ganttRef = useRef(null);
 
   useEffect(() => {
@@ -55,7 +61,39 @@ function App() {
     setTasks(filtered);
   };
 
-  const handleAddTask = () => {
+  const [inputText, setInputText] = useState('');
+
+const parseTaskFromText = useCallback((text) => {
+  const dates = chrono.parseDate(text);
+  const title = text.replace(/\b(by|due)\s+.+$/, '').trim();
+  
+  return {
+    title,
+    start: dates?.start ? formatDate(dates.start) : formatDate(new Date()),
+    end: dates?.end ? formatDate(dates.end) : formatDate(new Date(Date.now() + 86400000))
+  };
+}, []);
+
+const formatDate = (date) => {
+  return new Date(date).toISOString().split('T')[0];
+};
+
+const handleTextInput = (e) => {
+  if (e.key === 'Enter' && inputText.trim()) {
+    const parsed = parseTaskFromText(inputText);
+    const id = (tasks.length + 1).toString();
+    setTasks([...tasks, {
+      id,
+      title: parsed.title,
+      status: 'Backlog',
+      start: parsed.start,
+      end: parsed.end
+    }]);
+    setInputText('');
+  }
+};
+
+const handleAddTask = () => {
     const id = (tasks.length + 1).toString();
     setTasks([
       ...tasks,
@@ -69,7 +107,23 @@ function App() {
     ]);
   };
 
-  const handleClear = () => setTasks([]);
+  const handleSave = () => {
+    localStorage.setItem('projectData', JSON.stringify(tasks));
+    alert('Project saved!');
+  };
+
+  const handleLoad = () => {
+    const saved = localStorage.getItem('projectData');
+    if (saved) {
+      setTasks(JSON.parse(saved));
+      alert('Project loaded!');
+    }
+  };
+
+  const handleClear = () => {
+    setTasks([]);
+    localStorage.removeItem('projectData');
+  };
   const handlePreview = () => setShowGantt(s => !s);
 
   return (
@@ -77,8 +131,18 @@ function App() {
       {/* Kanban Board */}
       <div className="w-1/2 p-4 border-r flex flex-col">
         <div className="mb-4 flex gap-2">
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleTextInput}
+            placeholder="Type task & deadline (e.g. 'Finish design by Friday')"
+            className="flex-1 px-2 py-1 border rounded"
+          />
           <button className="bg-blue-500 text-white px-3 py-1 rounded" onClick={handleAddTask}>Add Task</button>
-          <button className="bg-gray-400 text-white px-3 py-1 rounded" onClick={handleClear}>Clear Board</button>
+          <button className="bg-purple-500 text-white px-3 py-1 rounded" onClick={handleSave}>Save Project</button>
+<button className="bg-indigo-500 text-white px-3 py-1 rounded" onClick={handleLoad}>Load Project</button>
+<button className="bg-gray-400 text-white px-3 py-1 rounded" onClick={handleClear}>Clear Board</button>
           <button className="bg-green-500 text-white px-3 py-1 rounded" onClick={handlePreview}>{showGantt ? 'Hide Timeline' : 'Preview Timeline'}</button>
         </div>
         <DragDropContext onDragEnd={onDragEnd}>
@@ -123,6 +187,11 @@ function App() {
           <div className="text-gray-400 text-center mt-20">Click "Preview Timeline" to show Gantt chart</div>
         )}
       </div>
+      <AIAssistantPanel 
+        tasks={tasks}
+        isOpen={showAIPanel}
+        onClose={() => setShowAIPanel(false)}
+      />
     </div>
   );
 }
