@@ -6,6 +6,11 @@ import { GanttChart } from './components/GanttChart';
 import AIAssistantPanel from './components/AIAssistantPanel';
 import { CreateTaskModal } from './components/CreateTaskModal';
 import { ProjectDashboard } from './components/ProjectDashboard';
+import ErrorBoundary from './components/ErrorBoundary';
+import { NotificationProvider } from './components/Notification';
+import { ResponsiveLayout } from './components/ResponsiveLayout';
+import { HelpModal } from './components/HelpModal';
+import { useCommonShortcuts } from './hooks/useKeyboardShortcuts';
 import * as chrono from 'chrono-node';
 import Gantt from 'frappe-gantt';
 
@@ -36,6 +41,7 @@ function App() {
   const [inputText, setInputText] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'dashboard', 'timeline'
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const ganttRef = useRef(null);
 
   // Save tasks to localStorage whenever they change
@@ -104,6 +110,7 @@ function App() {
         end: parsed.end
       }]);
       setInputText('');
+      window.showNotification?.success('Task created successfully!');
     }
   };
 
@@ -123,33 +130,56 @@ function App() {
 
   const handleSave = () => {
     localStorage.setItem('projectData', JSON.stringify(tasks));
-    alert('Project saved!');
+    window.showNotification?.success('Project saved successfully!');
   };
 
   const handleLoad = () => {
     const saved = localStorage.getItem('projectData');
     if (saved) {
       setTasks(JSON.parse(saved));
-      alert('Project loaded!');
+      window.showNotification?.success('Project loaded successfully!');
+    } else {
+      window.showNotification?.warning('No saved project found.');
     }
   };
 
   const handleClear = () => {
-    setTasks([]);
-    localStorage.removeItem('projectData');
+    if (confirm('Are you sure you want to clear all tasks? This action cannot be undone.')) {
+      setTasks([]);
+      localStorage.removeItem('projectData');
+      window.showNotification?.info('Project cleared successfully!');
+    }
   };
 
   const handlePreview = () => setShowGantt(s => !s);
 
-  return (
-    <div className="flex h-screen">
-      {/* Main Content */}
+  // Keyboard shortcuts
+  const shortcuts = useCommonShortcuts({
+    createTask: () => setShowCreateModal(true),
+    saveProject: handleSave,
+    loadProject: handleLoad,
+    toggleAI: () => setShowAIPanel(!showAIPanel),
+    escape: () => {
+      setShowCreateModal(false);
+      setShowHelpModal(false);
+    }
+  });
+
+  const renderMainContent = () => {
+    return (
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold text-gray-800">AI Project Tracker</h1>
             <div className="flex space-x-2">
+              <button
+                onClick={() => setShowHelpModal(true)}
+                className="px-3 py-2 rounded-lg text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+                title="Help & Keyboard Shortcuts"
+              >
+                ?
+              </button>
               <button
                 onClick={() => setShowAIPanel(!showAIPanel)}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -259,21 +289,36 @@ function App() {
           )}
         </div>
       </div>
+    );
+  };
 
-      {/* AI Assistant Panel */}
-      {showAIPanel && (
-        <AIAssistantPanel 
-          isOpen={showAIPanel}
-          onClose={() => setShowAIPanel(false)}
-        />
-      )}
+  return (
+    <ErrorBoundary>
+      <NotificationProvider>
+        <div className="flex h-screen">
+          {/* Main Content */}
+          {renderMainContent()}
 
-      {/* Modals */}
-      <CreateTaskModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-      />
-    </div>
+          {/* AI Assistant Panel */}
+          {showAIPanel && (
+            <AIAssistantPanel 
+              isOpen={showAIPanel}
+              onClose={() => setShowAIPanel(false)}
+            />
+          )}
+
+          {/* Modals */}
+          <CreateTaskModal
+            isOpen={showCreateModal}
+            onClose={() => setShowCreateModal(false)}
+          />
+          <HelpModal
+            isOpen={showHelpModal}
+            onClose={() => setShowHelpModal(false)}
+          />
+        </div>
+      </NotificationProvider>
+    </ErrorBoundary>
   );
 }
 
