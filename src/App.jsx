@@ -4,6 +4,8 @@ import { TaskProvider } from './contexts/TaskContext';
 import { KanbanBoard } from './components/KanbanBoard';
 import { GanttChart } from './components/GanttChart';
 import AIAssistantPanel from './components/AIAssistantPanel';
+import { CreateTaskModal } from './components/CreateTaskModal';
+import { ProjectDashboard } from './components/ProjectDashboard';
 import * as chrono from 'chrono-node';
 import Gantt from 'frappe-gantt';
 
@@ -32,6 +34,8 @@ function App() {
   const [showGantt, setShowGantt] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(true);
   const [inputText, setInputText] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'dashboard', 'timeline'
   const ganttRef = useRef(null);
 
   // Save tasks to localStorage whenever they change
@@ -139,99 +143,135 @@ function App() {
 
   return (
     <div className="flex h-screen">
-      {/* Kanban Board */}
-      <div className="w-1/2 p-4 border-r flex flex-col">
-        <div className="mb-4 flex gap-2 flex-wrap">
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={handleTextInput}
-            placeholder="Type task & deadline (e.g. 'Finish design by Friday')"
-            className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button 
-            className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors" 
-            onClick={handleAddTask}
-          >
-            Add Task
-          </button>
-          <button 
-            className="bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition-colors" 
-            onClick={handleSave}
-          >
-            Save Project
-          </button>
-          <button 
-            className="bg-indigo-500 text-white px-3 py-2 rounded-lg hover:bg-indigo-600 transition-colors" 
-            onClick={handleLoad}
-          >
-            Load Project
-          </button>
-          <button 
-            className="bg-gray-400 text-white px-3 py-2 rounded-lg hover:bg-gray-500 transition-colors" 
-            onClick={handleClear}
-          >
-            Clear Board
-          </button>
-          <button 
-            className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors" 
-            onClick={handlePreview}
-          >
-            {showGantt ? 'Hide Timeline' : 'Preview Timeline'}
-          </button>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-bold text-gray-800">AI Project Tracker</h1>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setShowAIPanel(!showAIPanel)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  showAIPanel 
+                    ? 'bg-purple-500 text-white' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                {showAIPanel ? 'Hide AI' : 'Show AI'}
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Input */}
+          <div className="flex gap-2 flex-wrap">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={handleTextInput}
+              placeholder="Type task & deadline (e.g. 'Finish design by Friday')"
+              className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button 
+              className="bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors" 
+              onClick={() => setShowCreateModal(true)}
+            >
+              + Add Task
+            </button>
+          </div>
         </div>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex flex-1 gap-2 overflow-x-auto">
-            {columns.map(col => (
-              <Droppable droppableId={col.id} key={col.id}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`bg-gray-100 rounded-lg p-3 flex-1 min-w-[180px] ${snapshot.isDraggingOver ? 'bg-blue-100' : ''}`}
-                  >
-                    <h2 className="font-bold text-center mb-3 text-gray-700">{col.title}</h2>
-                    {tasks.filter(t => t.status === col.id).map((task, idx) => (
-                      <Draggable draggableId={task.id} index={idx} key={task.id}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`mb-2 p-3 rounded-lg shadow-sm bg-white border border-gray-200 hover:shadow-md transition-shadow ${snapshot.isDragging ? 'bg-blue-50 shadow-lg' : ''}`}
-                          >
-                            <div className="font-medium text-gray-800">{task.title}</div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {task.start} - {task.end}
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            ))}
+
+        {/* View Mode Tabs */}
+        <div className="bg-gray-50 border-b border-gray-200 px-4 py-2">
+          <div className="flex space-x-1">
+            <button
+              onClick={() => setViewMode('dashboard')}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'dashboard' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => setViewMode('kanban')}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'kanban' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Kanban Board
+            </button>
+            <button
+              onClick={() => setViewMode('timeline')}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                viewMode === 'timeline' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              Timeline
+            </button>
           </div>
-        </DragDropContext>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-auto bg-gray-50">
+          {viewMode === 'dashboard' && (
+            <div className="p-4">
+              <ProjectDashboard />
+              <div className="flex gap-2 flex-wrap">
+                <button 
+                  className="bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition-colors" 
+                  onClick={handleSave}
+                >
+                  Save Project
+                </button>
+                <button 
+                  className="bg-indigo-500 text-white px-3 py-2 rounded-lg hover:bg-indigo-600 transition-colors" 
+                  onClick={handleLoad}
+                >
+                  Load Project
+                </button>
+                <button 
+                  className="bg-gray-400 text-white px-3 py-2 rounded-lg hover:bg-gray-500 transition-colors" 
+                  onClick={handleClear}
+                >
+                  Clear Board
+                </button>
+              </div>
+            </div>
+          )}
+
+          {viewMode === 'kanban' && (
+            <div className="p-4">
+              <KanbanBoard />
+            </div>
+          )}
+
+          {viewMode === 'timeline' && (
+            <div className="p-4">
+              <GanttChart />
+            </div>
+          )}
+        </div>
       </div>
-      {/* Gantt Chart */}
-      <div className="w-1/2 p-4 flex flex-col">
-        <h2 className="font-bold text-lg mb-4 text-gray-800">Timeline</h2>
-        {showGantt ? (
-          <div ref={ganttRef} className="overflow-x-auto bg-white rounded-lg shadow-sm p-4" style={{ minHeight: 400 }} />
-        ) : (
-          <div className="text-gray-400 text-center mt-20">
-            <div className="text-4xl mb-4">📅</div>
-            <p>Click "Preview Timeline" to show Gantt chart</p>
-          </div>
-        )}
-      </div>
-      <AIAssistantPanel 
-        isOpen={showAIPanel}
-        onClose={() => setShowAIPanel(false)}
+
+      {/* AI Assistant Panel */}
+      {showAIPanel && (
+        <AIAssistantPanel 
+          isOpen={showAIPanel}
+          onClose={() => setShowAIPanel(false)}
+        />
+      )}
+
+      {/* Modals */}
+      <CreateTaskModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
       />
     </div>
   );
