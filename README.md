@@ -79,22 +79,6 @@ For deployment (e.g., Netlify, Vercel), set these in your site environment varia
 4. **View project timeline** in the Gantt chart
 5. **Get AI insights** from the AI assistant panel
 
-### Example Prompts
-
-* "Design user interface by next Friday"
-* "Setup authentication system by end of month"
-* "Review pull requests by tomorrow"
-* "Deploy to production by next Monday"
-
-### AI Assistant Features
-
-* **Weekly Planning**: Generate comprehensive weekly plans with daily breakdowns
-* **Project Analysis**: Get project health scores and identify bottlenecks
-* **Task Suggestions**: AI-powered recommendations for missing tasks
-* **Real-time Alerts**: Due today, overdue, and upcoming tasks
-
----
-
 ## Project Structure
 
 ```
@@ -214,52 +198,3 @@ This project supports deployment on various platforms.
 
 ---
 
-## About
-
-AI-powered project management tool that transforms natural language into actionable tasks with intelligent planning assistance.
-
-### Resources
-
-* [React Documentation](https://react.dev/)
-* [Vite Documentation](https://vitejs.dev/)
-* [Tailwind CSS Documentation](https://tailwindcss.com/)
-* [Google AI Studio](https://makersuite.google.com/)
-
----
-
-## Roadmap
-
-* [ ] **Real-time Collaboration**: Multi-user editing and commenting
-* [ ] **Advanced AI Features**: Task prioritization and time estimation
-* [ ] **Integration APIs**: Connect with external project management tools
-* [ ] **Mobile App**: Native iOS and Android applications
-* [ ] **Offline Support**: PWA capabilities for offline usage
-* [ ] **Advanced Analytics**: Detailed project insights and reporting
-* [ ] **Custom Workflows**: User-defined task status and workflows
-* [ ] **API Backend**: RESTful API for data persistence
-* [ ] **Webhooks**: Real-time notifications and integrations
-* [ ] **Multi-language Support**: Internationalization (i18n)
-
----
-
-## Support
-
-* **Issues**: [GitHub Issues](https://github.com/yourusername/Auto-Project-Tracker-App/issues)
-* **Discussions**: [GitHub Discussions](https://github.com/yourusername/Auto-Project-Tracker-App/discussions)
-* **Documentation**: [Wiki](https://github.com/yourusername/Auto-Project-Tracker-App/wiki)
-
----
-
-## Changelog
-
-### v1.0.0 (Current)
-* ✅ Natural language task input
-* ✅ Kanban board with drag & drop
-* ✅ Gantt timeline visualization
-* ✅ AI-powered planning assistant
-* ✅ Real-time dashboard
-* ✅ Mobile-responsive design
-* ✅ Keyboard shortcuts
-* ✅ Error boundaries and notifications
-* ✅ Local storage persistence
-* ✅ Help system and documentation
