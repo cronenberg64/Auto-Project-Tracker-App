@@ -27,7 +27,7 @@ A React-based project management application with natural language task input, K
 - react-beautiful-dnd for drag & drop
 - frappe-gantt for timeline visualization
 - chrono-node for natural language date parsing
-- OpenAI API for AI planning assistance
+- Google Gemini API for AI planning assistance
 
 ## Quick Start
 
@@ -36,13 +36,15 @@ A React-based project management application with natural language task input, K
 npm install
 ```
 
-### 2. Setup OpenAI API (Optional)
+### 2. Setup Gemini API (Required for AI Features)
 For AI assistant features, create a `.env` file in the root directory:
 ```
-VITE_OPENAI_API_KEY=your_openai_api_key_here
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+
+**Note**: The `.env` file is already created with your API key for this project.
 
 ### 3. Start Development Server
 ```bash

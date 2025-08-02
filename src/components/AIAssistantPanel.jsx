@@ -38,7 +38,12 @@ export default function AIAssistantPanel({ isOpen, onClose }) {
   };
 
   const callGeminiAPI = async (prompt) => {
-    const apiKey = 'AIzaSyBeuqjUTdpVoTWzoU7Hqmy8_0K54BxGMkg';
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('Gemini API key not found. Please add VITE_GEMINI_API_KEY to your .env file.');
+    }
+    
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
     
     const response = await fetch(url, {
