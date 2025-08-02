@@ -4,7 +4,7 @@ import { useTaskContext } from '../hooks/useTaskContext';
 import { TaskDetailsModal } from './TaskDetailsModal';
 
 export const KanbanBoard = () => {
-  const { tasks, updateTask, deleteTask } = useTaskContext();
+  const { tasks, updateTask, deleteTask, moveTask } = useTaskContext();
   const [editingTask, setEditingTask] = useState(null);
   const [editText, setEditText] = useState('');
   const [modalTask, setModalTask] = useState(null);
@@ -59,9 +59,19 @@ export const KanbanBoard = () => {
     setModalTask(null);
   };
 
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    const { source, destination, draggableId } = result;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+    
+    // Use the moveTask function from context
+    moveTask(draggableId, destination.droppableId);
+  };
+
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4">
         {columns.map((column) => (
           <div key={column.id} className="bg-gray-100 rounded-lg p-4">
             <h2 className="text-lg font-semibold mb-4 text-gray-700">{column.title}</h2>
@@ -158,6 +168,7 @@ export const KanbanBoard = () => {
           </div>
         ))}
       </div>
+      </DragDropContext>
 
       <TaskDetailsModal
         task={modalTask}

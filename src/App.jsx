@@ -8,6 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/Notification';
 import { HelpModal } from './components/HelpModal';
 import { useCommonShortcuts } from './hooks/useKeyboardShortcuts';
+import { TaskProvider } from './contexts/TaskContext';
 import * as chrono from 'chrono-node';
 import Gantt from 'frappe-gantt';
 
@@ -250,30 +251,32 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <NotificationProvider>
-        <div className="flex h-screen">
-          {/* Main Content */}
-          {renderMainContent()}
+      <TaskProvider>
+        <NotificationProvider>
+          <div className="flex h-screen">
+            {/* Main Content */}
+            {renderMainContent()}
 
-          {/* AI Assistant Panel */}
-          {showAIPanel && (
-            <AIAssistantPanel 
-              isOpen={showAIPanel}
-              onClose={() => setShowAIPanel(false)}
+            {/* AI Assistant Panel */}
+            {showAIPanel && (
+              <AIAssistantPanel 
+                isOpen={showAIPanel}
+                onClose={() => setShowAIPanel(false)}
+              />
+            )}
+
+            {/* Modals */}
+            <CreateTaskModal
+              isOpen={showCreateModal}
+              onClose={() => setShowCreateModal(false)}
             />
-          )}
-
-          {/* Modals */}
-          <CreateTaskModal
-            isOpen={showCreateModal}
-            onClose={() => setShowCreateModal(false)}
-          />
-          <HelpModal
-            isOpen={showHelpModal}
-            onClose={() => setShowHelpModal(false)}
-          />
-        </div>
-      </NotificationProvider>
+            <HelpModal
+              isOpen={showHelpModal}
+              onClose={() => setShowHelpModal(false)}
+            />
+          </div>
+        </NotificationProvider>
+      </TaskProvider>
     </ErrorBoundary>
   );
 }
