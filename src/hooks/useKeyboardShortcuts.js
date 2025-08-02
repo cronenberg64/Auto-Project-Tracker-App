@@ -14,7 +14,7 @@ export const useKeyboardShortcuts = (shortcuts) => {
 
     // Check each shortcut
     Object.entries(shortcuts).forEach(([shortcut, action]) => {
-      const [keyCombo, description] = shortcut.split('|');
+      const [keyCombo] = shortcut.split('|');
       const [shortcutKey, shortcutCtrl, shortcutShift, shortcutAlt] = keyCombo.split('+');
       
       const keyMatch = key === shortcutKey.toLowerCase();

@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 
-const TaskCard = memo(({ task, onEdit, onDelete, onDragStart, onDragEnd, isDragging, dragHandleProps, draggableProps, innerRef }) => {
+const TaskCard = memo(({ task, onEdit, onDelete, isDragging, dragHandleProps, draggableProps, innerRef }) => {
   const handleEdit = (e) => {
     e.stopPropagation();
     onEdit(task);

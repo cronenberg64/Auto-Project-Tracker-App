@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { TaskProvider } from './contexts/TaskContext';
 import { KanbanBoard } from './components/KanbanBoard';
 import { GanttChart } from './components/GanttChart';
 import AIAssistantPanel from './components/AIAssistantPanel';
@@ -8,7 +6,6 @@ import { CreateTaskModal } from './components/CreateTaskModal';
 import { ProjectDashboard } from './components/ProjectDashboard';
 import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/Notification';
-import { ResponsiveLayout } from './components/ResponsiveLayout';
 import { HelpModal } from './components/HelpModal';
 import { useCommonShortcuts } from './hooks/useKeyboardShortcuts';
 import * as chrono from 'chrono-node';
@@ -23,20 +20,12 @@ const initialTasks = [
   { id: '5', title: 'Deploy', status: 'Done', start: '2024-07-30', end: '2024-08-01' },
 ];
 
-// Column definitions
-const columns = [
-  { id: 'Backlog', title: 'Backlog' },
-  { id: 'In Progress', title: 'In Progress' },
-  { id: 'Review', title: 'Review' },
-  { id: 'Done', title: 'Done' },
-];
-
 function App() {
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem('projectData');
     return saved ? JSON.parse(saved) : initialTasks;
   });
-  const [showGantt, setShowGantt] = useState(false);
+  const [showGantt] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(true);
   const [inputText, setInputText] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -65,23 +54,6 @@ function App() {
       new Gantt(ganttRef.current, ganttTasks, { view_mode: 'Day' });
     }
   }, [showGantt, tasks]);
-
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
-    const { source, destination, draggableId } = result;
-    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
-    
-    // Move task
-    const updated = Array.from(tasks);
-    const moved = updated.find(t => t.id === draggableId);
-    if (moved) {
-      moved.status = destination.droppableId;
-      // Remove and re-insert at new position
-      const filtered = updated.filter(t => t.id !== draggableId);
-      filtered.splice(destination.index, 0, moved);
-      setTasks(filtered);
-    }
-  };
 
   const parseTaskFromText = useCallback((text) => {
     const parsed = chrono.parseDate(text);
@@ -114,20 +86,6 @@ function App() {
     }
   };
 
-  const handleAddTask = () => {
-    const id = (tasks.length + 1).toString();
-    setTasks([
-      ...tasks,
-      {
-        id,
-        title: `New Task ${id}`,
-        status: 'Backlog',
-        start: formatDate(new Date()),
-        end: formatDate(new Date(Date.now() + 86400000)),
-      },
-    ]);
-  };
-
   const handleSave = () => {
     localStorage.setItem('projectData', JSON.stringify(tasks));
     window.showNotification?.success('Project saved successfully!');
@@ -151,10 +109,8 @@ function App() {
     }
   };
 
-  const handlePreview = () => setShowGantt(s => !s);
-
   // Keyboard shortcuts
-  const shortcuts = useCommonShortcuts({
+  useCommonShortcuts({
     createTask: () => setShowCreateModal(true),
     saveProject: handleSave,
     loadProject: handleLoad,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTaskContext } from '../hooks/useTaskContext';
 
 export default function AIAssistantPanel({ isOpen, onClose }) {
-  const { tasks, addTask } = useTaskContext();
+  const { tasks } = useTaskContext();
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,35 +37,48 @@ export default function AIAssistantPanel({ isOpen, onClose }) {
     return { total, completed, inProgress, backlog, review };
   };
 
+  const callGeminiAPI = async (prompt) => {
+    const apiKey = 'AIzaSyBeuqjUTdpVoTWzoU7Hqmy8_0K54BxGMkg';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error('Invalid response from Gemini API');
+    }
+  };
+
   const generateWeeklyPlan = async () => {
     setIsLoading(true);
     setError('');
     
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      
-      if (!apiKey) {
-        setError('OpenAI API key not found. Please add VITE_OPENAI_API_KEY to your .env file.');
-        setIsLoading(false);
-        return;
-      }
-
       const stats = getTaskStats();
       const overdue = getOverdue();
       const dueToday = getDueToday();
       const upcoming = getUpcoming();
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [{
-            role: 'user',
-            content: `As a project management AI assistant, analyze this project data and provide a comprehensive weekly plan:
+      const prompt = `As a project management AI assistant, analyze this project data and provide a comprehensive weekly plan:
 
 PROJECT STATISTICS:
 - Total tasks: ${stats.total}
@@ -89,24 +102,10 @@ Please provide:
 4. **Time Management**: Suggested time allocation for different task types
 5. **Action Items**: 3-5 specific actions to take today
 
-Format as a clear, actionable plan with bullet points and sections.`
-          }],
-          max_tokens: 800,
-          temperature: 0.7
-        })
-      });
+Format as a clear, actionable plan with bullet points and sections.`;
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        setSuggestions(data.choices[0].message.content.split('\n').filter(line => line.trim()));
-      } else {
-        setError('Invalid response from AI service');
-      }
+      const result = await callGeminiAPI(prompt);
+      setSuggestions(result.split('\n').filter(line => line.trim()));
     } catch (error) {
       console.error('AI Error:', error);
       setError(`Failed to generate plan: ${error.message}`);
@@ -119,29 +118,11 @@ Format as a clear, actionable plan with bullet points and sections.`
     setError('');
     
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      
-      if (!apiKey) {
-        setError('OpenAI API key not found. Please add VITE_OPENAI_API_KEY to your .env file.');
-        setIsLoading(false);
-        return;
-      }
-
       const stats = getTaskStats();
       const overdue = getOverdue();
       const dueToday = getDueToday();
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [{
-            role: 'user',
-            content: `Analyze this project's health and provide insights:
+      const prompt = `Analyze this project's health and provide insights:
 
 PROJECT DATA:
 ${JSON.stringify(tasks, null, 2)}
@@ -159,24 +140,10 @@ Please provide:
 4. **Timeline Risk**: Evaluate timeline risks and delays
 5. **Recommendations**: 3-5 specific recommendations to improve project flow
 
-Format as a structured analysis with clear sections.`
-          }],
-          max_tokens: 600,
-          temperature: 0.5
-        })
-      });
+Format as a structured analysis with clear sections.`;
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        setSuggestions(data.choices[0].message.content.split('\n').filter(line => line.trim()));
-      } else {
-        setError('Invalid response from AI service');
-      }
+      const result = await callGeminiAPI(prompt);
+      setSuggestions(result.split('\n').filter(line => line.trim()));
     } catch (error) {
       console.error('AI Error:', error);
       setError(`Failed to analyze project: ${error.message}`);
@@ -189,25 +156,7 @@ Format as a structured analysis with clear sections.`
     setError('');
     
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      
-      if (!apiKey) {
-        setError('OpenAI API key not found. Please add VITE_OPENAI_API_KEY to your .env file.');
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [{
-            role: 'user',
-            content: `Based on these existing tasks, suggest 3-5 additional tasks that would complement the project:
+      const prompt = `Based on these existing tasks, suggest 3-5 additional tasks that would complement the project:
 
 EXISTING TASKS:
 ${JSON.stringify(tasks, null, 2)}
@@ -225,24 +174,10 @@ For each suggestion, provide:
 - Priority level (High/Medium/Low)
 - Brief reasoning
 
-Format as a structured list with clear task descriptions.`
-          }],
-          max_tokens: 500,
-          temperature: 0.8
-        })
-      });
+Format as a structured list with clear task descriptions.`;
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.choices && data.choices[0] && data.choices[0].message) {
-        setSuggestions(data.choices[0].message.content.split('\n').filter(line => line.trim()));
-      } else {
-        setError('Invalid response from AI service');
-      }
+      const result = await callGeminiAPI(prompt);
+      setSuggestions(result.split('\n').filter(line => line.trim()));
     } catch (error) {
       console.error('AI Error:', error);
       setError(`Failed to generate suggestions: ${error.message}`);
@@ -273,7 +208,7 @@ Format as a structured list with clear task descriptions.`
   return (
     <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg p-4 border-l border-gray-200 overflow-y-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold text-gray-800">AI Assistant</h2>
+        <h2 className="text-lg font-bold text-gray-800">AI Assistant (Gemini)</h2>
         <button 
           onClick={onClose} 
           className="text-gray-500 hover:text-gray-700 text-xl font-bold"

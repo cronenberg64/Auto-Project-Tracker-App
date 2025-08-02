@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export const ResponsiveLayout = ({ children, sidebar, mainContent }) => {
+export const ResponsiveLayout = ({ sidebar, mainContent }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
