@@ -4,6 +4,8 @@ import { GanttChart } from './components/GanttChart';
 import AIAssistantPanel from './components/AIAssistantPanel';
 import { CreateTaskModal } from './components/CreateTaskModal';
 import { ProjectDashboard } from './components/ProjectDashboard';
+import { GitIntegration } from './components/GitIntegration';
+import { GitWorkflow } from './components/GitWorkflow';
 import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './components/Notification';
 import { HelpModal } from './components/HelpModal';
@@ -30,7 +32,7 @@ function App() {
   const [showAIPanel, setShowAIPanel] = useState(true);
   const [inputText, setInputText] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'dashboard', 'timeline'
+  const [viewMode, setViewMode] = useState('kanban'); // 'kanban', 'dashboard', 'timeline', 'git-integration', 'git-workflow'
   const [showHelpModal, setShowHelpModal] = useState(false);
   const ganttRef = useRef(null);
 
@@ -192,16 +194,36 @@ function App() {
             >
               Kanban Board
             </button>
-            <button
-              onClick={() => setViewMode('timeline')}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                viewMode === 'timeline' 
-                  ? 'bg-white text-blue-600 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              Timeline
-            </button>
+                                    <button
+                          onClick={() => setViewMode('timeline')}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            viewMode === 'timeline' 
+                              ? 'bg-white text-blue-600 shadow-sm' 
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        >
+                          Timeline
+                        </button>
+                        <button
+                          onClick={() => setViewMode('git-integration')}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            viewMode === 'git-integration' 
+                              ? 'bg-white text-blue-600 shadow-sm' 
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        >
+                          Git Integration
+                        </button>
+                        <button
+                          onClick={() => setViewMode('git-workflow')}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            viewMode === 'git-workflow' 
+                              ? 'bg-white text-blue-600 shadow-sm' 
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        >
+                          Git Workflow
+                        </button>
           </div>
         </div>
 
@@ -239,11 +261,23 @@ function App() {
             </div>
           )}
 
-          {viewMode === 'timeline' && (
-            <div className="p-4">
-              <GanttChart />
-            </div>
-          )}
+                                {viewMode === 'timeline' && (
+                        <div className="p-4">
+                          <GanttChart />
+                        </div>
+                      )}
+
+                      {viewMode === 'git-integration' && (
+                        <div className="p-4">
+                          <GitIntegration />
+                        </div>
+                      )}
+
+                      {viewMode === 'git-workflow' && (
+                        <div className="p-4">
+                          <GitWorkflow />
+                        </div>
+                      )}
         </div>
       </div>
     );

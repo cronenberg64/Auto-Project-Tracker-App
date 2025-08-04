@@ -14,9 +14,11 @@ An AI-powered project management application that transforms natural language in
 * **Intelligent Kanban Board**: Drag & drop task management with smart status tracking
 * **Gantt Timeline Visualization**: Visual project timeline with task dependencies
 * **AI-Powered Planning**: Gemini AI assistant for weekly planning and project analysis
+* **Git Repository Integration**: Connect to GitHub repos and manage tasks per directory/file
+* **Git-like Workflow**: Branch-based task management, staging, commits, and merges
 * **Real-time Dashboard**: Live statistics, progress tracking, and alerts
 * **Advanced Task Management**: Edit, delete, and create tasks with detailed forms
-* **Multiple View Modes**: Dashboard, Kanban Board, and Timeline views
+* **Multiple View Modes**: Dashboard, Kanban Board, Timeline, Git Integration, and Git Workflow
 * **Smart Notifications**: User feedback and status updates
 * **Keyboard Shortcuts**: Quick access to common actions
 * **Responsive Design**: Mobile-first design with touch support
@@ -79,6 +81,25 @@ For deployment (e.g., Netlify, Vercel), set these in your site environment varia
 4. **View project timeline** in the Gantt chart
 5. **Get AI insights** from the AI assistant panel
 
+### Git Integration Features
+
+* **Repository Connection**: Connect to GitHub repositories and browse directory structure
+* **File-based Tasks**: Create tasks for specific files and directories
+* **Branch Management**: Organize tasks by Git branches (main, develop, feature branches)
+* **Staging Area**: Stage tasks before committing them
+* **Commit History**: Track task commits with messages and timestamps
+* **Merge Operations**: Merge tasks between branches
+* **Working Directory**: View uncommitted changes
+* **Git Workflow**: Full Git-like workflow for task management
+
+### View Modes
+
+* **Dashboard**: Project statistics and overview
+* **Kanban Board**: Traditional drag & drop task management
+* **Timeline**: Gantt chart visualization
+* **Git Integration**: Repository structure and file-based tasks
+* **Git Workflow**: Branch management and Git-like operations
+
 ## Project Structure
 
 ```
@@ -89,6 +110,8 @@ Auto-Project-Tracker-App/
 │   │   ├── CreateTaskModal.jsx      # Task creation modal
 │   │   ├── ErrorBoundary.jsx        # Error handling
 │   │   ├── GanttChart.jsx           # Timeline visualization
+│   │   ├── GitIntegration.jsx       # GitHub repository integration
+│   │   ├── GitWorkflow.jsx          # Git-like workflow management
 │   │   ├── HelpModal.jsx            # Help system
 │   │   ├── KanbanBoard.jsx          # Drag & drop board
 │   │   ├── LoadingSpinner.jsx       # Loading indicators
